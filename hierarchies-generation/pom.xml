@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>hierarchies-generation</artifactId>
-
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -40,6 +40,12 @@
             <groupId>eu.europeana</groupId>
             <artifactId>hierarchies-common</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
