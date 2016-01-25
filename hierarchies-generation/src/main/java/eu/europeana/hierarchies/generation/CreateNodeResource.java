@@ -12,7 +12,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * REST API exposing the generation of nodes functionality within Neo4j
@@ -62,7 +64,7 @@ public class CreateNodeResource {
     public Response createNodes(@FormParam("recordValues") String recordValues) throws IOException{
         InputNodeList inputList = mapper.readValue(recordValues,InputNodeList.class);
         ParentNodeList pNodes = new ParentNodeList();
-        List<ParentNode> pNodeList = new ArrayList<>();
+        Set<ParentNode> pNodeList = new HashSet<>();
         for(InputNode inputNode:inputList.getInputNodeList()) {
             String parent = createNodeFromInputNode(inputNode);
             if (parent != null) {
