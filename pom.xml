@@ -8,7 +8,7 @@
     <artifactId>hierarchies</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>hiearchies-common</module>
+        <module>hierarchies-common</module>
         <module>hierarchies-generation</module>
         <module>hierarchies-service</module>
     </modules>

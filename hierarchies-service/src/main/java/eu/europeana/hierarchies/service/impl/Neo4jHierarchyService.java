@@ -2,6 +2,8 @@ package eu.europeana.hierarchies.service.impl;
 
 
 import eu.europeana.hierarchies.service.HierarchyService;
+import eu.europeana.hierarchies.service.cache.CacheDAO;
+import eu.europeana.hierarchies.service.cache.CacheEntry;
 import eu.europeana.hierarchies.service.utils.InputNodeCreator;
 import eu.europeana.hierarchy.InputNode;
 import eu.europeana.hierarchy.InputNodeList;
@@ -10,16 +12,14 @@ import eu.europeana.hierarchy.ParentNodeList;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Service Accessing the Neo4j unmanaged extensions
@@ -29,14 +29,18 @@ public class Neo4jHierarchyService implements HierarchyService{
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private Client client =  ClientBuilder.newBuilder().build();
+    @Inject
+    private CacheDAO cacheDAO;
     @Override
-    public ParentNode createNode(Map<String, Object> params) throws IOException {
+    public ParentNode createNode(String collection,Map<String, Object> params) throws IOException {
         InputNode node = InputNodeCreator.createInputNodeFromMap(params);
         if(node!=null){
             WebTarget target = client.target("/node/generate");
             Form form =new Form();
             form.param("recordValues", objectMapper.writeValueAsString(node));
-            return target.path("").request().post(Entity.form(form)).readEntity(ParentNode.class);
+            ParentNode pNode = target.path("").request().post(Entity.form(form)).readEntity(ParentNode.class);
+            cacheDAO.addParentToSet(collection,pNode.getId());
+            return pNode;
         }
         return null;
     }
@@ -48,7 +52,7 @@ public class Neo4jHierarchyService implements HierarchyService{
     }
 
     @Override
-    public Set<ParentNode> createNodes(List<Map<String, Object>> records) throws IOException {
+    public Set<ParentNode> createNodes(String collection,List<Map<String, Object>> records) throws IOException {
         InputNodeList list = new InputNodeList();
         List<InputNode> inList = new ArrayList<>();
         for(Map<String,Object> map:records){
@@ -61,7 +65,13 @@ public class Neo4jHierarchyService implements HierarchyService{
         Form form =new Form();
         list.setInputNodeList(inList);
         form.param("recordValues",objectMapper.writeValueAsString(list));
-        return target.path("").request().post(Entity.form(form)).readEntity(ParentNodeList.class).getParentNodeList();
+        Set<ParentNode> parentNodeSet = target.path("").request().post(Entity.form(form)).readEntity(ParentNodeList.class).getParentNodeList();
+        Set<String> ids = new HashSet<>();
+        for(ParentNode parentNode: parentNodeSet){
+            ids.add(parentNode.getId());
+        }
+        cacheDAO.addParentsToSet(collection,ids);
+        return parentNodeSet;
     }
 
     @Override
@@ -104,4 +114,11 @@ public class Neo4jHierarchyService implements HierarchyService{
         WebTarget target = client.target("/collection/"+collection);
         target.request().get();
     }
+
+    @Override
+    public CacheEntry retrieveParentsByCollection(String collection) throws IOException {
+        return cacheDAO.getByCollection(collection);
+    }
+
+
 }

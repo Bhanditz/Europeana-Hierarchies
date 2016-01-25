@@ -1,5 +1,6 @@
 package eu.europeana.hierarchies.service;
 
+import eu.europeana.hierarchies.service.cache.CacheEntry;
 import eu.europeana.hierarchy.ParentNode;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public interface HierarchyService {
      * @param record The record to create
      * @return The parent of the node if it exists or empty other wise
      */
-    eu.europeana.hierarchy.ParentNode createNode(Map<String,Object> record) throws IOException;
+    eu.europeana.hierarchy.ParentNode createNode(String collection,Map<String,Object> record) throws IOException;
 
     /**
      * Create the relationships for a given id
@@ -31,7 +32,7 @@ public interface HierarchyService {
      * @param records The records to create
      * @return A set of parent nodes
      */
-    Set<ParentNode> createNodes(List<Map<String,Object>> records) throws IOException;
+    Set<ParentNode> createNodes(String collection,List<Map<String,Object>> records) throws IOException;
 
     /**
      * Batch creation of relationships for nodes
@@ -68,4 +69,11 @@ public interface HierarchyService {
      * @param collection The collection to delete
      */
     void deleteByCollection(String collection);
+
+    /**
+     * Retrieve the parents identified for a collection
+     * @param collection The collection to retrieve the parents for
+     * @return The list of parents from cache
+     */
+    CacheEntry retrieveParentsByCollection(String collection) throws IOException;
 }
