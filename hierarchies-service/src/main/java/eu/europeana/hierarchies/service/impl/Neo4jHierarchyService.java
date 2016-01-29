@@ -31,11 +31,20 @@ public class Neo4jHierarchyService implements HierarchyService{
     private Client client =  ClientBuilder.newBuilder().build();
     @Inject
     private CacheDAO cacheDAO;
+
+    public Neo4jHierarchyService(){
+
+    }
+
+    public Neo4jHierarchyService(CacheDAO dao, Client client){
+        this.cacheDAO = dao;
+        this.client = client;
+    }
     @Override
     public ParentNode createNode(String collection,Map<String, Object> params) throws IOException {
         InputNode node = InputNodeCreator.createInputNodeFromMap(params);
         if(node!=null){
-            WebTarget target = client.target("/node/generate");
+            WebTarget target = client.target("/nodes/node/generate");
             Form form =new Form();
             form.param("recordValues", objectMapper.writeValueAsString(node));
             ParentNode pNode = target.path("").request().post(Entity.form(form)).readEntity(ParentNode.class);
@@ -48,25 +57,25 @@ public class Neo4jHierarchyService implements HierarchyService{
     @Override
     public void createRelationsForNode(String id) {
         WebTarget target = client.target("/relations/generate/"+ StringUtils.replace(id,"/","%2F"));
-        target.path("").request().post(null);
+        target.request().post(null);
     }
 
     @Override
     public Set<ParentNode> createNodes(String collection,List<Map<String, Object>> records) throws IOException {
         InputNodeList list = new InputNodeList();
-        List<InputNode> inList = new ArrayList<>();
+        List<InputNode> inList = new ArrayList<InputNode>();
         for(Map<String,Object> map:records){
             InputNode node = InputNodeCreator.createInputNodeFromMap(map);
             if(node!=null){
                 inList.add(node);
             }
         }
-        WebTarget target = client.target("/nodes/generate");
+        WebTarget target = client.target("/nodes/nodes/generate");
         Form form =new Form();
         list.setInputNodeList(inList);
         form.param("recordValues",objectMapper.writeValueAsString(list));
         Set<ParentNode> parentNodeSet = target.path("").request().post(Entity.form(form)).readEntity(ParentNodeList.class).getParentNodeList();
-        Set<String> ids = new HashSet<>();
+        Set<String> ids = new HashSet<String>();
         for(ParentNode parentNode: parentNodeSet){
             ids.add(parentNode.getId());
         }

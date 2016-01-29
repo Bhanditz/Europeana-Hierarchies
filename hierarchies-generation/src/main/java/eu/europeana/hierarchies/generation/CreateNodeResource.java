@@ -20,7 +20,7 @@ import java.util.Set;
  * REST API exposing the generation of nodes functionality within Neo4j
  * Created by ymamakis on 1/21/16.
  */
-@Path("/")
+@Path("/nodes")
 public class CreateNodeResource {
 
     private GraphDatabaseService service;
@@ -64,7 +64,7 @@ public class CreateNodeResource {
     public Response createNodes(@FormParam("recordValues") String recordValues) throws IOException{
         InputNodeList inputList = mapper.readValue(recordValues,InputNodeList.class);
         ParentNodeList pNodes = new ParentNodeList();
-        Set<ParentNode> pNodeList = new HashSet<>();
+        Set<ParentNode> pNodeList = new HashSet<ParentNode>();
         for(InputNode inputNode:inputList.getInputNodeList()) {
             String parent = createNodeFromInputNode(inputNode);
             if (parent != null) {

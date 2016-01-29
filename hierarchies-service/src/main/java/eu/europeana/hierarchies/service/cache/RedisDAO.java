@@ -14,6 +14,14 @@ import java.util.Set;
  */
 public class RedisDAO implements CacheDAO{
 
+    public RedisDAO(){
+
+    }
+
+    public RedisDAO(Jedis jedis){
+        this.jedis= jedis;
+    }
+
     @Inject
     private Jedis jedis;
     private ObjectMapper objMapper = new ObjectMapper();
@@ -23,7 +31,7 @@ public class RedisDAO implements CacheDAO{
     public void addParentToSet(String collection, String parent) throws IOException {
         String entry = jedis.get(collection);
         CacheEntry cache = new CacheEntry();
-        Set<String> parents = new HashSet<>();
+        Set<String> parents = new HashSet<String>();
         if(entry!=null){
             cache = objMapper.readValue(entry,CacheEntry.class);
             parents = cache.getParents();
@@ -39,7 +47,7 @@ public class RedisDAO implements CacheDAO{
     public void addParentsToSet(String collection, Set<String> parents)throws IOException {
         String entry = jedis.get(collection);
         CacheEntry cache = new CacheEntry();
-        Set<String> parentsToAdd = new HashSet<>();
+        Set<String> parentsToAdd = new HashSet<String>();
         if(entry!=null){
             cache = objMapper.readValue(entry,CacheEntry.class);
             parents = cache.getParents();
